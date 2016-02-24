@@ -58,7 +58,7 @@ module Redmine
         zoom = (options[:zoom] || User.current.pref[:gantt_zoom]).to_i
         @zoom = (zoom > 0 && zoom < 5) ? zoom : 2
         months = (options[:months] || User.current.pref[:gantt_months]).to_i
-        @months = (months > 0 && months < 25) ? months : 6
+        @months = (months > 0 && months < 100) ? months : 6
         @work_on_weekends = RedmineBetterGanttChart.work_on_weekends?
         work_on_weekends = @work_on_weekends
 
@@ -414,7 +414,7 @@ module Redmine
 
         subject_width = 400
         header_height = 18
-	line_height = 18
+        line_height = 18
         # width of one day in pixels
         zoom = @zoom*2
         g_width = (work_days_in(@date_to, @date_from) + 1)*zoom
@@ -714,7 +714,7 @@ module Redmine
 
         # Transforms dates into pixels witdh
         coords.keys.each do |key|
-          coords[key] = (coords[key] * zoom).floor
+          coords[key] = (coords[key] * zoom * 0.5).floor
         end
         coords
       end
@@ -849,6 +849,9 @@ module Redmine
         end
         
         if coords[:bar_start] && coords[:bar_end]
+          coords[:bar_start] *= 2 
+	  coords[:bar_end] *= 2
+	  
           if options[:issue]
             output << "<div id='#{issue_id}'#{issue_relations}style='top:#{ top }px;left:#{ coords[:bar_start] }px;width:#{ coords[:bar_end] - coords[:bar_start] - 2}px;' class='#{options[:css]} task_todo'>&nbsp;</div>"
           else
@@ -856,9 +859,11 @@ module Redmine
           end
           
           if coords[:bar_late_end]
+            coords[:bar_late_end] *= 2
             output << "<div style='top:#{ top }px;left:#{ coords[:bar_start] }px;width:#{ coords[:bar_late_end] - coords[:bar_start] - 2}px;' class='#{options[:css]} task_late'>&nbsp;</div>"
           end
           if coords[:bar_progress_end]
+            coords[:bar_progress_end] *= 2
             output << "<div style='top:#{ top }px;left:#{ coords[:bar_start] }px;width:#{ coords[:bar_progress_end] - coords[:bar_start] - 2}px;' class='#{options[:css]} task_done'>&nbsp;</div>"
           end
         end
@@ -866,9 +871,11 @@ module Redmine
         # Renders the markers
         if options[:markers]
           if coords[:start]
+            coords[:start] *= 2
             output << "<div style='top:#{ top }px;left:#{ coords[:start] }px;width:15px;' class='#{options[:css]} marker starting'>&nbsp;</div>"
           end
           if coords[:end]
+            coords[:end] *= 2
             output << "<div style='top:#{ top }px;left:#{ coords[:end] + params[:zoom] }px;width:15px;' class='#{options[:css]} marker ending'>&nbsp;</div>"
           end
         end
